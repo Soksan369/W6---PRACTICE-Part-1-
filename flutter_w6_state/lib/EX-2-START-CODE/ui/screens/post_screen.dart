@@ -1,61 +1,76 @@
 import 'package:flutter/material.dart';
+import '../../ui/providers/post_provider.dart';
 import 'package:provider/provider.dart';
-
 import '../../model/post.dart';
-import '../providers/async_value.dart';
-import '../providers/post_provider.dart';
 
-class PostScreen extends StatelessWidget {
-  const PostScreen({super.key});
+class PostsScreen extends StatelessWidget {
+  const PostsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    //  1 - Get the post provider
-    final PostProvider postProvider = Provider.of<PostProvider>(context);
+    final postsProvider = Provider.of<PostsProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Posts'),
         actions: [
           IconButton(
-            // 2- Fetch the post
-            onPressed: () => {postProvider.fetchPost(45)},
-            icon: const Icon(Icons.update),
+            onPressed: () => postsProvider.fetchPosts(),
+            icon: const Icon(Icons.refresh),
           ),
         ],
       ),
-
-      // 3 -  Display the post
-      body: Center(child: _buildBody(postProvider)),
+      body: Center(child: _buildBody(postsProvider)),
     );
   }
 
-  Widget _buildBody(PostProvider courseProvider) {
-    final postValue = courseProvider.postValue;
+  Widget _buildBody(PostsProvider postsProvider) {
+    final postValue = postsProvider.postValue;
 
     if (postValue == null) {
-      return Text('Tap refresh to display post'); // display an empty state
+      return const Text('Tap refresh to load posts');
     }
 
     switch (postValue.state) {
       case AsyncValueState.loading:
-        return CircularProgressIndicator(); // display a progress
-
+        return const CircularProgressIndicator();
       case AsyncValueState.error:
-        return Text('Error: ${postValue.error}'); // display a error
-
+        return Text('Error: ${postValue.error}');
       case AsyncValueState.success:
-        return PostCard(post: postValue.data!); // display the post
+        final posts = postValue.data!;
+        return posts.isEmpty
+            ? const Text('No posts available')
+            : PostsList(posts: posts);
     }
   }
 }
 
-class PostCard extends StatelessWidget {
-  const PostCard({super.key, required this.post});
+class PostsList extends StatelessWidget {
+  final List<Post> posts;
 
-  final Post post;
+  const PostsList({super.key, required this.posts});
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(title: Text(post.title), subtitle: Text(post.description));
+    return ListView.builder(
+      itemCount: posts.length,
+      itemBuilder: (context, index) {
+        return PostCard(post: posts[index]);
+      },
+    );
+  }
+}
+
+class PostCard extends StatelessWidget {
+  final Post post;
+
+  const PostCard({super.key, required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(post.title),
+      subtitle: Text(post.description),
+    );
   }
 }
