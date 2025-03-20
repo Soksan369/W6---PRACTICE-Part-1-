@@ -1,4 +1,4 @@
-  import 'dart:convert';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../model/post.dart';
 import 'post_repository.dart';

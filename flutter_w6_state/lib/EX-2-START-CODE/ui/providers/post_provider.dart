@@ -37,4 +37,4 @@ class PostsProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-}  
+}
